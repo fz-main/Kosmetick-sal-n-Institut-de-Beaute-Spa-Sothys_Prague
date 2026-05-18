@@ -1,0 +1,2271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Institut de Beauté & Spa Sothys — Premium French Beauty Institute Prague</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --sothys-opal-light: #fffaf0; /* Floral White */
+      --sothys-opal-base: #fffafa; /* Snow */
+      --sothys-opal-dark: #f5f5dc; /* Beige */
+      --sothys-rose-gold: #ffe4e1; /* Misty Rose */
+      --sothys-rose-gold-alt: #e1c6c3; /* Softer rose gold */
+      --sothys-pearl: #f0e68c; /* Khaki, for subtle accents */
+      --sothys-deep-base: #08080c;
+      --sothys-surface: #121218;
+      --sothys-surface2: #1a1a20;
+      --text-primary: #f0f4f8;
+      --text-muted: #ccc8b8;
+      --glass-bg: rgba(255, 250, 240, 0.08);
+      --glass-border: rgba(255, 228, 225, 0.2); /* Rose gold border */
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+      color-scheme: dark;
+    }
+
+    body {
+      background-color: var(--sothys-deep-base);
+      color: var(--text-primary);
+      font-family: 'Playfair Display', serif, sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* WebGL Container */
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #canvas-container canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+      background: transparent;
+    }
+
+    .content-layer {
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Navbar */
+    #navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      padding: 20px 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8,8,12,0.6);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border-bottom: 1px solid var(--glass-border);
+      transition: all 0.4s ease;
+    }
+
+    .logo-text {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      background: linear-gradient(135deg, var(--sothys-opal-light) 0%, var(--sothys-rose-gold) 40%, var(--sothys-pearl) 70%, var(--sothys-opal-base) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-transform: uppercase;
+      font-family: 'Cinzel Decorative', cursive;
+    }
+
+    .logo-sub {
+      font-size: 0.5rem;
+      letter-spacing: 0.3em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 3px;
+      font-family: 'Helvetica Now Text', sans-serif;
+    }
+
+    .lang-switcher {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .lang-btn {
+      padding: 7px 16px;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--glass-border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Helvetica Now Text', sans-serif;
+    }
+
+    .lang-btn:hover, .lang-btn.active {
+      background: var(--sothys-rose-gold-alt);
+      color: var(--sothys-deep-base);
+      border-color: var(--sothys-rose-gold-alt);
+    }
+
+    /* Sections */
+    section {
+      min-height: 100vh;
+      position: relative;
+      padding: 120px 50px 80px;
+      overflow: hidden;
+    }
+
+    #hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 100vh;
+      padding-top: 120px;
+      padding-bottom: 80px;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      color: var(--sothys-rose-gold);
+      text-transform: uppercase;
+      font-family: 'Helvetica Now Text', sans-serif;
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 0.3s;
+    }
+
+    .hero-title {
+      font-size: clamp(3.8rem, 10vw, 8.5rem);
+      font-weight: 700;
+      line-height: 1.0;
+      letter-spacing: -0.01em;
+      background: linear-gradient(135deg, var(--sothys-opal-light) 0%, var(--sothys-rose-gold) 30%, var(--text-primary) 50%, var(--sothys-opal-dark) 70%, var(--sothys-pearl) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 0.6s;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: 'Helvetica Now Text', sans-serif;
+      max-width: 520px;
+      margin: 0 auto 48px;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 0.9s;
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 17px 44px;
+      background: linear-gradient(135deg, var(--sothys-opal-base), var(--sothys-rose-gold-alt));
+      color: var(--sothys-deep-base); /* Dark text on gold/opal gradient */
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      font-family: 'Helvetica Now Text', sans-serif;
+      border: none;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 1.2s;
+      text-decoration: none;
+      box-shadow: 0 15px 40px rgba(255, 228, 225, 0.15); /* Soft rose gold shadow */
+    }
+
+    .cta-btn:hover {
+      color: var(--text-primary);
+      transform: translateY(-3px);
+      box-shadow: 0 25px 60px rgba(255, 228, 225, 0.25); /* Stronger rose gold shadow */
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 2s;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 48px;
+      background: linear-gradient(to bottom, var(--sothys-rose-gold), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    .scroll-label {
+      font-size: 0.55rem;
+      letter-spacing: 0.3em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-family: 'Helvetica Now Text', sans-serif;
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.4; transform: scaleY(1); }
+      50% { opacity: 1; transform: scaleY(1.2); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Particle canvas */
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Matrix Overlay Canvas */
+    #matrix-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    /* Data pulse labels */
+    .data-pulse {
+      position: fixed;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      color: var(--sothys-rose-gold);
+      text-transform: uppercase;
+      font-family: 'Helvetica Now Text', monospace;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 50;
+      white-space: nowrap;
+      text-shadow: 0 0 15px rgba(255, 228, 225, 0.6);
+    }
+
+    /* Services Section */
+    #services {
+      min-height: 200vh;
+      padding: 0;
+    }
+
+    .services-header {
+      padding: 120px 50px 80px;
+      text-align: center;
+      position: relative;
+      z-index: 12;
+    }
+
+    .section-eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      color: var(--sothys-rose-gold);
+      text-transform: uppercase;
+      font-family: 'Helvetica Now Text', sans-serif;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      background: linear-gradient(135deg, var(--sothys-opal-base), var(--text-primary), var(--sothys-opal-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive;
+    }
+
+    .section-desc {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin: 0 auto;
+      font-family: 'Helvetica Now Text', sans-serif;
+    }
+
+    .bento-wrapper {
+      padding: 0 50px 120px;
+      will-change: transform;
+      position: relative;
+      z-index: 12;
+    }
+
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto;
+      gap: 24px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .bento-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      padding: 45px 40px;
+      transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+      cursor: default;
+      will-change: transform;
+      overflow: hidden;
+      position: relative;
+      border-radius: 8px; /* Slightly rounded corners */
+    }
+
+    .bento-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--sothys-rose-gold), transparent);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .bento-card:hover::before { opacity: 1; }
+
+    .bento-card:hover {
+      box-shadow: 0 35px 90px rgba(255, 228, 225, 0.2); /* Rose gold shadow */
+      border-color: rgba(255, 215, 0, 0.35); /* Stronger gold border */
+    }
+
+    .bento-card.large {
+      grid-column: span 2;
+    }
+
+    .bento-card.tall {
+      grid-row: span 2;
+    }
+
+    .card-number {
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      color: var(--sothys-rose-gold);
+      text-transform: uppercase;
+      font-family: 'Helvetica Now Text', sans-serif;
+      margin-bottom: 22px;
+      opacity: 0.7;
+    }
+
+    .card-icon {
+      font-size: 3rem;
+      margin-bottom: 22px;
+      display: block;
+      color: var(--sothys-opal-base); /* Default icon color */
+      font-family: 'Playfair Display', serif;
+      line-height: 1;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    .card-title {
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 18px;
+      line-height: 1.15;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive;
+    }
+
+    .card-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      font-family: 'Helvetica Now Text', sans-serif;
+      filter: blur(5px);
+      transition: filter 0.6s ease;
+    }
+
+    .bento-card:hover .card-desc {
+      filter: blur(0);
+    }
+
+    .card-price {
+      margin-top: 26px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 22px;
+      border: 1px solid var(--glass-border);
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      color: var(--sothys-rose-gold);
+      text-transform: uppercase;
+      font-family: 'Helvetica Now Text', sans-serif;
+      background: rgba(255, 228, 225, 0.05);
+      border-radius: 4px;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 22px;
+    }
+
+    .tag {
+      padding: 4px 12px;
+      background: rgba(255, 250, 240, 0.15);
+      border: 1px solid rgba(255, 250, 240, 0.3);
+      font-size: 0.62rem;
+      letter-spacing: 0.15em;
+      color: var(--sothys-opal-dark);
+      text-transform: uppercase;
+      font-family: 'Helvetica Now Text', sans-serif;
+      border-radius: 3px;
+    }
+
+    /* About / Manifesto Section */
+    #about {
+      padding: 120px 50px;
+      max-width: 1280px;
+      margin: 0 auto;
+      background: var(--sothys-surface);
+    }
+
+    .manifesto-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 90px;
+      align-items: center;
+    }
+
+    .manifesto-text h2 {
+      font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 30px;
+      background: linear-gradient(135deg, var(--sothys-rose-gold), var(--text-primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive;
+    }
+
+    .manifesto-text p {
+      font-size: 0.98rem;
+      color: var(--text-muted);
+      line-height: 1.9;
+      font-family: 'Helvetica Now Text', sans-serif;
+      margin-bottom: 24px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    .stat-item {
+      padding: 30px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-radius: 6px;
+    }
+    .stat-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 60px rgba(255, 228, 225, 0.1); /* Rose gold shadow */
+    }
+
+    .stat-number {
+      font-size: 3.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--sothys-rose-gold), var(--sothys-rose-gold-alt));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 10px;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive;
+    }
+
+    .stat-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.3em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-family: 'Helvetica Now Text', sans-serif;
+    }
+
+    /* Specialists Section */
+    #specialists {
+      padding: 120px 50px;
+      background: var(--sothys-surface2);
+    }
+
+    .specialists-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      max-width: 1280px;
+      margin: 70px auto 0;
+    }
+
+    .specialist-card {
+      background: var(--sothys-surface);
+      border: 1px solid var(--glass-border);
+      overflow: hidden;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      border-radius: 8px;
+    }
+
+    .specialist-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 45px 90px rgba(255, 228, 225, 0.15); /* Rose gold shadow */
+    }
+
+    .specialist-avatar {
+      width: 100%;
+      height: 280px;
+      background: linear-gradient(135deg, #1a1a1c 0%, #2a2a24 50%, #1a1a1a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .specialist-avatar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 30%, rgba(255, 228, 225, 0.18) 0%, transparent 70%); /* Rose gold radial glow */
+    }
+
+    .avatar-initials {
+      font-size: 3.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--sothys-rose-gold), var(--sothys-rose-gold-alt));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+      z-index: 1;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive;
+    }
+
+    .avatar-ring {
+      position: absolute;
+      width: 110px;
+      height: 110px;
+      border: 1px solid rgba(255, 228, 225, 0.28);
+      border-radius: 50%;
+      animation: ringPulse 3s ease-in-out infinite;
+    }
+
+    .avatar-ring:nth-child(2) {
+      width: 140px;
+      height: 140px;
+      animation-delay: 0.8s;
+      opacity: 0.5;
+    }
+
+    @keyframes ringPulse {
+      0%, 100% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.05); opacity: 0.7; }
+    }
+
+    .specialist-info {
+      padding: 30px 30px 35px;
+    }
+
+    .specialist-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive;
+    }
+
+    .specialist-role {
+      font-size: 0.68rem;
+      letter-spacing: 0.3em;
+      color: var(--sothys-rose-gold);
+      text-transform: uppercase;
+      font-family: 'Helvetica Now Text', sans-serif;
+      margin-bottom: 18px;
+    }
+
+    .specialist-bio {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      font-family: 'Helvetica Now Text', sans-serif;
+      margin-bottom: 24px;
+    }
+
+    .specialist-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .skill-tag {
+      padding: 4px 12px;
+      background: rgba(255, 250, 240, 0.1);
+      border: 1px solid rgba(255, 250, 240, 0.25);
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      color: var(--sothys-opal-dark);
+      text-transform: uppercase;
+      font-family: 'Helvetica Now Text', sans-serif;
+      border-radius: 3px;
+    }
+
+    /* Location Section */
+    #location {
+      padding: 120px 50px;
+      background: var(--sothys-deep-base);
+    }
+
+    .location-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 70px;
+      max-width: 1280px;
+      margin: 70px auto 0;
+      align-items: start;
+    }
+
+    .location-info h3 {
+      font-size: 1.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 26px;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive;
+    }
+
+    .location-detail {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--glass-border);
+      font-family: 'Helvetica Now Text', sans-serif;
+    }
+
+    .location-detail-icon {
+      font-size: 1.2rem;
+      color: var(--sothys-rose-gold);
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    .location-detail-title {
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      color: var(--sothys-rose-gold);
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .location-detail-value {
+      font-size: 0.92rem;
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .map-container {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+    }
+
+    .map-container::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 250, 240, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 5;
+      border-radius: 8px;
+    }
+
+    .map-container iframe {
+      display: block;
+      width: 100%;
+      height: 450px;
+      border: 0;
+      filter: invert(95%) sepia(5%) saturate(10%) hue-rotate(180deg) brightness(95%) contrast(90%); /* Dark / Pearl theme */
+    }
+
+    /* Footer */
+    #footer {
+      background: var(--sothys-deep-base);
+      border-top: 1px solid var(--glass-border);
+      padding: 90px 50px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 70px;
+      max-width: 1280px;
+      margin: 0 auto 70px;
+    }
+
+    .footer-brand p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-family: 'Helvetica Now Text', sans-serif;
+      line-height: 1.7;
+      margin-top: 18px;
+      max-width: 300px;
+    }
+
+    .footer-col h4 {
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      color: var(--sothys-rose-gold);
+      text-transform: uppercase;
+      font-family: 'Helvetica Now Text', sans-serif;
+      margin-bottom: 24px;
+    }
+
+    .footer-col ul {
+      list-style: none;
+    }
+
+    .footer-col ul li {
+      margin-bottom: 14px;
+    }
+
+    .footer-col ul li a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-family: 'Helvetica Now Text', sans-serif;
+      transition: color 0.3s ease;
+    }
+
+    .footer-col ul li a:hover {
+      color: var(--sothys-rose-gold);
+    }
+
+    .footer-bottom {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 32px;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .footer-copy {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-family: 'Helvetica Now Text', sans-serif;
+      letter-spacing: 0.08em;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 18px;
+    }
+
+    .social-link {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      font-family: 'Helvetica Now Text', sans-serif;
+      border-radius: 50%;
+    }
+
+    .social-link:hover {
+      border-color: var(--sothys-rose-gold);
+      color: var(--sothys-rose-gold);
+      background: rgba(255, 228, 225, 0.08);
+    }
+
+    /* Sothys Dividers */
+    .sothys-divider {
+      width: 70px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--sothys-rose-gold), transparent);
+      margin: 0 auto 40px;
+    }
+
+    /* Reveal animation classes */
+    .reveal-up {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .reveal-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Booking CTA strip */
+    .booking-strip {
+      background: linear-gradient(135deg, rgba(8,8,12,0.05) 0%, rgba(255,228,225,0.05) 100%);
+      border-top: 1px solid var(--glass-border);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 70px 50px;
+      text-align: center;
+    }
+
+    .booking-strip h3 {
+      font-size: clamp(1.7rem, 3.5vw, 2.8rem);
+      background: linear-gradient(135deg, var(--sothys-rose-gold), var(--text-primary), var(--sothys-rose-gold-alt));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 14px;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive;
+    }
+
+    .booking-strip p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      font-family: 'Helvetica Now Text', sans-serif;
+      margin-bottom: 40px;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 900px) {
+      #navbar { padding: 18px 28px; }
+      .bento-grid { grid-template-columns: 1fr; }
+      .bento-card.large { grid-column: span 1; }
+      .bento-card.tall { grid-row: span 1; }
+      .specialists-grid { grid-template-columns: 1fr; }
+      .manifesto-layout { grid-template-columns: 1fr; gap: 40px; }
+      .location-layout { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+      section { padding: 100px 28px 60px; }
+      .services-header, .bento-wrapper { padding-left: 28px; padding-right: 28px; }
+      .booking-strip, .footer-bottom { padding-left: 28px; padding-right: 28px; }
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cinzel+Decorative:wght@400;700&family=Helvetica+Now+Text:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- WebGL Canvas Container -->
+  <div id="canvas-container"></div>
+
+  <!-- Particle Canvas -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Matrix Overlay Canvas -->
+  <canvas id="matrix-overlay"></canvas>
+
+  <!-- Data Pulse Labels -->
+  <div class="data-pulse" id="pulse-1">SOTHYS FACIAL</div>
+  <div class="data-pulse" id="pulse-2">SPA RITUAL</div>
+  <div class="data-pulse" id="pulse-3">GLOW SKIN</div>
+  <div class="data-pulse" id="pulse-4">SOTHYS PRAGUE</div>
+  <div class="data-pulse" id="pulse-5">ÚJEZD 40</div>
+
+  <!-- NAVBAR -->
+  <nav id="navbar">
+    <div>
+      <div class="logo-text">Institut de Beauté</div>
+      <div class="logo-sub">SOTHYS · PRESTIGE SPA · PRAGUE</div>
+    </div>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('cz')">CZ</button>
+      <button class="lang-btn" onclick="setLang('ru')">RU</button>
+    </div>
+  </nav>
+
+  <!-- CONTENT LAYER -->
+  <div class="content-layer">
+
+    <!-- HERO -->
+    <section id="hero">
+      <div class="hero-eyebrow" data-i18n="hero_eyebrow">The French Art of Beauty</div>
+      <h1 class="hero-title" data-i18n="hero_title">INSTITUT DE BEAUTÉ<br/>SOTHYS PRAGUE</h1>
+      <p class="hero-subtitle" data-i18n="hero_sub">Experience the pinnacle of skincare & spa rituals</p>
+      <a href="#services" class="cta-btn" data-i18n="hero_cta">
+        Discover Our Treatments →
+      </a>
+      <div class="scroll-indicator">
+        <div class="scroll-line"></div>
+        <div class="scroll-label" data-i18n="scroll">Scroll</div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section id="services">
+      <div class="services-header reveal-up">
+        <div class="section-eyebrow" data-i18n="services_eyebrow">Our Expertise</div>
+        <h2 class="section-title" data-i18n="services_title">French Beauty Rituals</h2>
+        <div class="sothys-divider"></div>
+        <p class="section-desc" data-i18n="services_desc">Indulge in exclusive Sothys treatments, where Parisian elegance meets advanced dermatological science.</p>
+      </div>
+
+      <div class="bento-wrapper" id="bento-wrapper">
+        <div class="bento-grid" id="bento-grid">
+
+          <!-- Card 1: Facials - Large -->
+          <div class="bento-card large" data-tilt>
+            <div class="card-number">01 — Facials</div>
+            <span class="card-icon">🌸</span>
+            <h3 class="card-title" data-i18n="card1_title">Advanced Sothys Facials</h3>
+            <p class="card-desc" data-i18n="card1_desc">Experience world-renowned Sothys facial treatments. From our signature Digi-Expression™ massage to targeted solutions for hydration, anti-aging, and radiance, we restore your skin's natural vitality.</p>
+            <div class="card-tags">
+              <span class="tag">Hydration</span>
+              <span class="tag">Anti-Aging</span>
+              <span class="tag">Radiance</span>
+              <span class="tag">Sothys Signature</span>
+            </div>
+            <div class="card-price">From 2,500 CZK</div>
+          </div>
+
+          <!-- Card 2: Body Spa - Tall -->
+          <div class="bento-card tall" data-tilt>
+            <div class="card-number">02 — Body Spa</div>
+            <span class="card-icon">🌿</span>
+            <h3 class="card-title" data-i18n="card2_title">Premium Body Spa Rituals</h3>
+            <p class="card-desc" data-i18n="card2_desc">Immerse yourself in pure relaxation. Our body treatments include luxurious exfoliation, therapeutic massages, and nourishing wraps using bespoke Sothys body care collections for ultimate rejuvenation.</p>
+            <div class="card-tags">
+              <span class="tag">Therapeutic Massage</span>
+              <span class="tag">Exfoliation</span>
+              <span class="tag">Nourishing Wraps</span>
+              <span class="tag">Holistic Relaxation</span>
+            </div>
+            <div class="card-price">From 3,200 CZK</div>
+          </div>
+
+          <!-- Card 3: Cosmetology -->
+          <div class="bento-card" data-tilt>
+            <div class="card-number">03 — Cosmetology</div>
+            <span class="card-icon">✨</span>
+            <h3 class="card-title" data-i18n="card3_title">Expert Cosmetology Treatments</h3>
+            <p class="card-desc" data-i18n="card3_desc">State-of-the-art aesthetic cosmetology. Advanced treatments for personalized skin correction, including microdermabrasion, gentle peels, and high-performance serums.</p>
+            <div class="card-tags">
+              <span class="tag">Microdermabrasion</span>
+              <span class="tag">Peels</span>
+              <span class="tag">Skin Correction</span>
+            </div>
+            <div class="card-price">From 3,000 CZK</div>
+          </div>
+
+          <!-- Card 4: Advanced Aesthetics -->
+          <div class="bento-card" data-tilt>
+            <div class="card-number">04 — Aesthetics</div>
+            <span class="card-icon">💎</span>
+            <h3 class="card-title" data-i18n="card4_title">Advanced Aesthetic Care</h3>
+            <p class="card-desc" data-i18n="card4_desc">Cutting-edge aesthetic treatments focusing on revitalization and firming. Utilizing advanced technologies and Sothys professional formulas for visible, lasting results.</p>
+            <div class="card-tags">
+              <span class="tag">Revitalization</span>
+              <span class="tag">Firming Treatments</span>
+              <span class="tag">High-Performance</span>
+            </div>
+            <div class="card-price">From 4,500 CZK</div>
+          </div>
+
+          <!-- Card 5: Makeup Artistry -->
+          <div class="bento-card" data-tilt>
+            <div class="card-number">05 — Makeup</div>
+            <span class="card-icon">💄</span>
+            <h3 class="card-title" data-i18n="card5_title">French Makeup Artistry</h3>
+            <p class="card-desc" data-i18n="card5_desc">Professional makeup applications that enhance your natural beauty. Perfect for special occasions or an elegant everyday look, using premium cosmetic lines.</p>
+            <div class="card-tags">
+              <span class="tag">Event Makeup</span>
+              <span class="tag">Natural Glamour</span>
+              <span class="tag">Bridal</span>
+            </div>
+            <div class="card-price">From 1,800 CZK</div>
+          </div>
+
+          <!-- Card 6: Packages - Large -->
+          <div class="bento-card large" data-tilt>
+            <div class="card-number">06 — Packages</div>
+            <span class="card-icon">⚜️</span>
+            <h3 class="card-title" data-i18n="card6_title">Exclusive Sothys Journeys</h3>
+            <p class="card-desc" data-i18n="card6_desc">Curated spa journeys combining multiple Sothys treatments for a complete mind and body escape. These bespoke experiences offer unparalleled luxury and rejuvenation, often including private spa access and gourmet refreshments.</p>
+            <div class="card-tags">
+              <span class="tag">Holistic Escape</span>
+              <span class="tag">Bespoke Luxury</span>
+              <span class="tag">Private Access</span>
+            </div>
+            <div class="card-price">Packages from 9,800 CZK</div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT / MANIFESTO -->
+    <section id="about">
+      <div class="manifesto-layout">
+        <div class="manifesto-text reveal-up">
+          <div class="section-eyebrow" data-i18n="about_eyebrow">Our Commitment</div>
+          <h2 data-i18n="about_title">The Sothys Philosophy<br/>of Beauty</h2>
+          <p data-i18n="about_p1">Institut de Beauté & Spa Sothys embodies the French art of beauty—a harmonious blend of advanced science and sensory pleasure. We are dedicated to delivering exceptional skincare and spa experiences that reveal your natural radiance.</p>
+          <p data-i18n="about_p2">Located in the heart of Prague's charming Malá Strana district at Újezd 40, our institute is a haven of tranquility and sophistication.</p>
+          <a href="#location" class="cta-btn" style="margin-top: 18px;" data-i18n="about_cta">Discover Our Haven →</a>
+        </div>
+        <div class="stats-grid reveal-up">
+          <div class="stat-item">
+            <div class="stat-number">50+</div>
+            <div class="stat-label" data-i18n="stat1">Years of French Excellence</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">10,000+</div>
+            <div class="stat-label" data-i18n="stat2">Transformative Treatments</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">25</div>
+            <div class="stat-label" data-i18n="stat3">Certified Beauty Experts</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">99.9%</div>
+            <div class="stat-label" data-i18n="stat4">Client Radiance</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SPECIALISTS -->
+    <section id="specialists">
+      <div style="max-width:1280px; margin:0 auto;">
+        <div class="section-eyebrow reveal-up" data-i18n="spec_eyebrow" style="text-align:center;">Our Artisans</div>
+        <h2 class="section-title reveal-up" style="text-align:center;" data-i18n="spec_title">Meet Our Beauty Experts</h2>
+        <div class="sothys-divider"></div>
+        <p class="section-desc reveal-up" style="text-align:center;margin:0 auto 0;" data-i18n="spec_desc">Our team of highly trained professionals are masters in the art of French cosmetics and spa therapy.</p>
+
+        <div class="specialists-grid">
+
+          <div class="specialist-card reveal-up">
+            <div class="specialist-avatar">
+              <div class="avatar-ring"></div>
+              <div class="avatar-ring"></div>
+              <div class="avatar-initials">EK</div>
+            </div>
+            <div class="specialist-info">
+              <div class="specialist-name">Elodie Dubois</div>
+              <div class="specialist-role" data-i18n="spec1_role">Lead Facialist &amp; Sothys Expert</div>
+              <p class="specialist-bio" data-i18n="spec1_bio">With over 15 years specializing in Sothys' scientifically advanced facial techniques, Elodie is renowned for her ability to restore and rejuvenate skin, bringing a touch of Parisian elegance to every treatment.</p>
+              <div class="specialist-skills">
+                <span class="skill-tag">Sothys Facials</span>
+                <span class="skill-tag">Digi-Expression™</span>
+                <span class="skill-tag">Skin Peels</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="specialist-card reveal-up">
+            <div class="specialist-avatar">
+              <div class="avatar-ring"></div>
+              <div class="avatar-ring"></div>
+              <div class="avatar-initials">MP</div>
+            </div>
+            <div class="specialist-info">
+              <div class="specialist-name">Marc Pelletier</div>
+              <div class="specialist-role" data-i18n="spec2_role">Master Spa Therapist</div>
+              <p class="specialist-bio" data-i18n="spec2_bio">Marc's therapeutic touch and deep knowledge of bodywork create profoundly relaxing and restorative spa journeys. He excels in deep tissue, aromatherapy, and hot stone massages.</p>
+              <div class="specialist-skills">
+                <span class="skill-tag">Deep Tissue</span>
+                <span class="skill-tag">Aromatherapy</span>
+                <span class="skill-tag">Hot Stone</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="specialist-card reveal-up">
+            <div class="specialist-avatar">
+              <div class="avatar-ring"></div>
+              <div class="avatar-ring"></div>
+              <div class="avatar-initials">SZ</div>
+            </div>
+            <div class="specialist-info">
+              <div class="specialist-name">Sophia Moreau</div>
+              <div class="specialist-role" data-i18n="spec3_role">Cosmetology Specialist</div>
+              <p class="specialist-bio" data-i18n="spec3_bio">Sophia is an expert in modern cosmetology, expertly performing microdermabrasion, advanced peels, and targeted treatments for precise skin correction and enhancement.</p>
+              <div class="specialist-skills">
+                <span class="skill-tag">Microdermabrasion</span>
+                <span class="skill-tag">Chemical Peels</span>
+                <span class="skill-tag">Skin Analysis</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="specialist-card reveal-up">
+            <div class="specialist-avatar">
+              <div class="avatar-ring"></div>
+              <div class="avatar-ring"></div>
+              <div class="avatar-initials">JR</div>
+            </div>
+            <div class="specialist-info">
+              <div class="specialist-name">Juliette Roche</div>
+              <div class="specialist-role" data-i18n="spec4_role">Aesthetic & Makeup Artist</div>
+              <p class="specialist-bio" data-i18n="spec4_bio">Juliette combines artistic flair with technical skill to create flawless makeup looks and enhance natural features through advanced aesthetic techniques.</p>
+              <div class="specialist-skills">
+                <span class="skill-tag">Bridal Makeup</span>
+                <span class="skill-tag">Event Styling</span>
+                <span class="skill-tag">Facial Contouring</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="specialist-card reveal-up">
+            <div class="specialist-avatar">
+              <div class="avatar-ring"></div>
+              <div class="avatar-ring"></div>
+              <div class="avatar-initials">CL</div>
+            </div>
+            <div class="specialist-info">
+              <div class="specialist-name">Chloé Laurent</div>
+              <div class="specialist-role" data-i18n="spec5_role">Body Care &amp; Polish Expert</div>
+              <p class="specialist-bio" data-i18n="spec5_bio">Chloé specializes in creating luminous, smooth skin through expert body polishing, wraps, and invigorating spa treatments, leaving you feeling refreshed and renewed.</p>
+              <div class="specialist-skills">
+                <span class="skill-tag">Body Polishing</span>
+                <span class="skill-tag">Spa Wraps</span>
+                <span class="skill-tag">Cellulite Treatment</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="specialist-card reveal-up">
+            <div class="specialist-avatar">
+              <div class="avatar-ring"></div>
+              <div class="avatar-ring"></div>
+              <div class="avatar-initials">AP</div>
+            </div>
+            <div class="specialist-info">
+              <div class="specialist-name">Antoine Petit</div>
+              <div class="specialist-role" data-i18n="spec6_role">Men's Grooming Specialist</div>
+              <p class="specialist-bio" data-i18n="spec6_bio">Antoine offers refined grooming services for men, focusing on precision cuts, therapeutic scalp treatments, and rejuvenating facial care tailored for male skin.</p>
+              <div class="specialist-skills">
+                <span class="skill-tag">Men's Facials</span>
+                <span class="skill-tag">Scalp Therapy</span>
+                <span class="skill-tag">Precision Cuts</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- BOOKING STRIP -->
+    <div class="booking-strip reveal-up">
+      <div class="section-eyebrow" data-i18n="booking_eyebrow">Begin Your Indulgence</div>
+      <h3 data-i18n="booking_title">Book Your Sothys Experience</h3>
+      <p data-i18n="booking_desc">Discover bespoke treatments tailored to your unique needs. Schedule your consultation today.</p>
+      <a href="tel:+420XXXXXXXXX" class="cta-btn" data-i18n="booking_cta">Reserve Your Escape →</a>
+    </div>
+
+    <!-- LOCATION / MAP -->
+    <section id="location">
+      <div style="max-width:1280px; margin: 0 auto;">
+        <div style="text-align:center;">
+          <div class="section-eyebrow reveal-up" data-i18n="loc_eyebrow">Our Parisian Escape</div>
+          <h2 class="section-title reveal-up" data-i18n="loc_title">Prague Institut de Beauté</h2>
+          <div class="sothys-divider"></div>
+        </div>
+
+        <div class="location-layout">
+          <div class="location-info reveal-up">
+            <h3 data-i18n="loc_address_title">Újezd 450/40<br/>Malá Strana, Prague</h3>
+
+            <div class="location-detail">
+              <span class="location-detail-icon">◉</span>
+              <div>
+                <div class="location-detail-title" data-i18n="loc_addr">Address</div>
+                <div class="location-detail-value">Újezd 450/40<br/>118 00 Praha 1-Malá Strana,<br/>Czech Republic</div>
+              </div>
+            </div>
+
+            <div class="location-detail">
+              <span class="location-detail-icon">◷</span>
+              <div>
+                <div class="location-detail-title" data-i18n="loc_hours">Opening Hours</div>
+                <div class="location-detail-value" data-i18n="loc_hours_val">Mon–Fri: 9:00 – 20:00<br/>Saturday: 10:00 – 18:00<br/>Sunday: Closed</div>
+              </div>
+            </div>
+
+            <div class="location-detail">
+              <span class="location-detail-icon">☎</span>
+              <div>
+                <div class="location-detail-title" data-i18n="loc_phone">Phone</div>
+                <div class="location-detail-value">+420 XXX XXX XXX</div>
+              </div>
+            </div>
+
+            <div class="location-detail">
+              <span class="location-detail-icon">✉</span>
+              <div>
+                <div class="location-detail-title" data-i18n="loc_email">Email</div>
+                <div class="location-detail-value">contact@sothys-prague.cz</div>
+              </div>
+            </div>
+
+            <div class="location-detail">
+              <span class="location-detail-icon">⟲</span>
+              <div>
+                <div class="location-detail-title" data-i18n="loc_transport">Transport</div>
+                <div class="location-detail-value" data-i18n="loc_transport_val">Tram 7, 9, 12, 20, 22, 23: Hellichova<br/>Metro A: Malostranská (15 min walk)<br/>Parking: Nearby Petřín Parking Garage</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="map-container reveal-up">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2561.258633!2d14.400205000000001!3d50.0774059!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x470b94b3798f8753%3A0x1122334455667788!2sInstitut+de+Beaut%C3%A9+%26+Spa+Sothys!5e0!3m2!1sen!2scz!4v1700000000000!5m2!1sen!2scz"
+              allowfullscreen=""
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              title="Institut de Beauté & Spa Sothys Location — Újezd 450/40, Praha 1"
+            ></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="footer">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo-text" style="font-size:1.3rem;">Institut de Beauté</div>
+          <div class="logo-sub">SOTHYS · PRESTIGE SPA · PRAGUE</div>
+          <p data-i18n="footer_desc">Újezd 450/40, Malá Strana, Prague 1. A sanctuary where French elegance and scientific skincare transform beauty.</p>
+        </div>
+        <div class="footer-col">
+          <h4 data-i18n="footer_services">Services</h4>
+          <ul>
+            <li><a href="#services" data-i18n="f_facial">Sothys Facials</a></li>
+            <li><a href="#services" data-i18n="f_body">Body Spa Rituals</a></li>
+            <li><a href="#services" data-i18n="f_cosm">Cosmetology</a></li>
+            <li><a href="#services" data-i18n="f_aesthet">Aesthetics</a></li>
+            <li><a href="#services" data-i18n="f_makeup">Makeup Artistry</a></li>
+            <li><a href="#services" data-i18n="f_pkg">Signature Journeys</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4 data-i18n="footer_clinic">Clinic</h4>
+          <ul>
+            <li><a href="#about" data-i18n="f_about">Our Philosophy</a></li>
+            <li><a href="#specialists" data-i18n="f_team">Our Experts</a></li>
+            <li><a href="#location" data-i18n="f_loc">Visit Us</a></li>
+            <li><a href="#" data-i18n="f_careers">Careers</a></li>
+            <li><a href="#" data-i18n="f_gift">Gift Vouchers</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4 data-i18n="footer_connect">Connect</h4>
+          <ul>
+            <li><a href="#" data-i18n="f_faqs">FAQs</a></li>
+            <li><a href="#" data-i18n="f_contact">Contact</a></li>
+            <li><a href="#" data-i18n="f_privacy">Privacy Policy</a></li>
+            <li><a href="#" data-i18n="f_terms">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="footer-copy">© 2025 INSTITUT DE BEAUTÉ SOTHYS s.r.o. — Prague. All rights reserved.</div>
+        <div class="social-links">
+          <a href="#" class="social-link" aria-label="Instagram">IG</a>
+          <a href="#" class="social-link" aria-label="Facebook">FB</a>
+          <a href="#" class="social-link" aria-label="Pinterest">PT</a>
+          <a href="#" class="social-link" aria-label="LinkedIn">LI</a>
+        </div>
+      </div>
+    </footer>
+
+  </div><!-- end content-layer -->
+
+  <script>
+  // ============================================================
+  // LANGUAGE DICTIONARY
+  // ============================================================
+  const i18n = {
+    en: {
+      hero_eyebrow: "The French Art of Beauty",
+      hero_title: "INSTITUT DE BEAUTÉ<br/>SOTHYS PRAGUE",
+      hero_sub: "Experience the pinnacle of skincare & spa rituals",
+      hero_cta: "Discover Our Treatments →",
+      scroll: "Scroll",
+      services_eyebrow: "Our Expertise",
+      services_title: "French Beauty Rituals",
+      services_desc: "Indulge in exclusive Sothys treatments, where Parisian elegance meets advanced dermatological science.",
+      card1_title: "Advanced Sothys Facials",
+      card1_desc: "Experience world-renowned Sothys facial treatments. From our signature Digi-Expression™ massage to targeted solutions for hydration, anti-aging, and radiance, we restore your skin's natural vitality.",
+      card2_title: "Premium Body Spa Rituals",
+      card2_desc: "Immerse yourself in pure relaxation. Our body treatments include luxurious exfoliation, therapeutic massages, and nourishing wraps using bespoke Sothys body care collections for ultimate rejuvenation.",
+      card3_title: "Expert Cosmetology Treatments",
+      card3_desc: "State-of-the-art aesthetic cosmetology. Advanced treatments for personalized skin correction, including microdermabrasion, gentle peels, and high-performance serums.",
+      card4_title: "Advanced Aesthetic Care",
+      card4_desc: "Cutting-edge aesthetic treatments focusing on revitalization and firming. Utilizing advanced technologies and Sothys professional formulas for visible, lasting results.",
+      card5_title: "French Makeup Artistry",
+      card5_desc: "Professional makeup applications that enhance your natural beauty. Perfect for special occasions or an elegant everyday look, using premium cosmetic lines.",
+      card6_title: "Exclusive Sothys Journeys",
+      card6_desc: "Curated spa journeys combining multiple Sothys treatments for a complete mind and body escape. These bespoke experiences offer unparalleled luxury and rejuvenation, often including private spa access and gourmet refreshments.",
+      about_eyebrow: "Our Commitment",
+      about_title: "The Sothys Philosophy<br/>of Beauty",
+      about_p1: "Institut de Beauté & Spa Sothys embodies the French art of beauty—a harmonious blend of advanced science and sensory pleasure. We are dedicated to delivering exceptional skincare and spa experiences that reveal your natural radiance.",
+      about_p2: "Located in the heart of Prague's charming Malá Strana district at Újezd 40, our institute is a haven of tranquility and sophistication.",
+      about_cta: "Discover Our Haven →",
+      stat1: "Years of French Excellence", stat2: "Transformative Treatments", stat3: "Certified Beauty Experts", stat4: "Client Radiance",
+      spec_eyebrow: "Our Artisans",
+      spec_title: "Meet Our Beauty Experts",
+      spec_desc: "Our team of highly trained professionals are masters in the art of French cosmetics and spa therapy.",
+      spec1_role: "Lead Facialist & Sothys Expert",
+      spec1_bio: "With over 15 years specializing in Sothys' scientifically advanced facial techniques, Elodie is renowned for her ability to restore and rejuvenate skin, bringing a touch of Parisian elegance to every treatment.",
+      spec2_role: "Master Spa Therapist",
+      spec2_bio: "Marc's therapeutic touch and deep knowledge of bodywork create profoundly relaxing and restorative spa journeys. He excels in deep tissue, aromatherapy, and hot stone massages.",
+      spec3_role: "Cosmetology Specialist",
+      spec3_bio: "Sophia is an expert in modern cosmetology, expertly performing microdermabrasion, advanced peels, and targeted treatments for precise skin correction and enhancement.",
+      spec4_role: "Aesthetic & Makeup Artist",
+      spec4_bio: "Juliette combines artistic flair with technical skill to create flawless makeup looks and enhance natural features through advanced aesthetic techniques.",
+      spec5_role: "Body Care & Polish Expert",
+      spec5_bio: "Chloé specializes in creating luminous, smooth skin through expert body polishing, wraps, and invigorating spa treatments, leaving you feeling refreshed and renewed.",
+      spec6_role: "Men's Grooming Specialist",
+      spec6_bio: "Antoine offers refined grooming services for men, focusing on precision cuts, therapeutic scalp treatments, and rejuvenating facial care tailored for male skin.",
+      booking_eyebrow: "Begin Your Indulgence",
+      booking_title: "Book Your Sothys Experience",
+      booking_desc: "Discover bespoke treatments tailored to your unique needs. Schedule your consultation today.",
+      booking_cta: "Reserve Your Escape →",
+      loc_eyebrow: "Our Parisian Escape",
+      loc_title: "Prague Institut de Beauté",
+      loc_address_title: "Újezd 450/40<br/>Malá Strana, Prague",
+      loc_addr: "Address",
+      loc_hours: "Opening Hours",
+      loc_hours_val: "Mon–Fri: 9:00 – 20:00<br/>Saturday: 10:00 – 18:00<br/>Sunday: Closed",
+      loc_phone: "Phone",
+      loc_email: "Email",
+      loc_transport: "Transport",
+      loc_transport_val: "Tram 7, 9, 12, 20, 22, 23: Hellichova<br/>Metro A: Malostranská (15 min walk)<br/>Parking: Nearby Petřín Parking Garage",
+      footer_desc: "Újezd 450/40, Malá Strana, Prague 1. A sanctuary where French elegance and scientific skincare transform beauty.",
+      footer_services: "Services", footer_clinic: "Clinic", footer_legal: "Legal",
+      f_facial: "Sothys Facials", f_body: "Body Spa Rituals", f_cosm: "Cosmetology",
+      f_aesthet: "Aesthetics", f_makeup: "Makeup Artistry", f_pkg: "Signature Journeys",
+      f_about: "Our Philosophy", f_team: "Our Experts", f_loc: "Visit Us",
+      f_careers: "Careers", f_gift: "Gift Vouchers",
+      f_faqs: "FAQs", f_contact: "Contact", f_privacy: "Privacy Policy", f_terms: "Terms of Service"
+    },
+    cz: {
+      hero_eyebrow: "Francouzské umění krásy",
+      hero_title: "INSTITUT DE BEAUTÉ<br/>SOTHYS PRAHA",
+      hero_sub: "Zažijte vrchol péče o pleť a lázeňské rituály",
+      hero_cta: "Objevte naše ošetření →",
+      scroll: "Scrollovat",
+      services_eyebrow: "Naše odbornost",
+      services_title: "Francouzské kosmetické rituály",
+      services_desc: "Dopřejte si exkluzivní ošetření Sothys, kde se pařížská elegance snoubí s pokročilou dermatologickou vědou.",
+      card1_title: "Pokročilé kosmetické kúry Sothys",
+      card1_desc: "Zažijte světově proslulá kosmetická ošetření Sothys. Od naší signaturní masáže Digi-Expression™ po cílená řešení pro hydrataci, proti stárnutí a pro zářivost pleti obnovujeme její přirozenou vitalitu.",
+      card2_title: "Prémiové lázeňské tělové rituály",
+      card2_desc: "Ponořte se do čisté relaxace. Naše tělová ošetření zahrnují luxusní peelingy, terapeutické masáže a výživné zábaly s použitím exkluzivních tělových kolekcí Sothys pro dokonalé omlazení.",
+      card3_title: "Odborné kosmetologické ošetření",
+      card3_desc: "Špičková estetická kosmetologie. Pokročilé procedury pro personalizovanou korekci pleti, včetně mikrodermabraze, jemných peelingů a vysoce účinných sér.",
+      card4_title: "Pokročilá estetická péče",
+      card4_desc: "Nejmodernější estetická ošetření zaměřená na revitalizaci a zpevnění. Využíváme pokročilé technologie a profesionální formule Sothys pro viditelné, trvalé výsledky.",
+      card5_title: "Francouzské umění líčení",
+      card5_desc: "Profesionální aplikaci make-upu, která podtrhne vaši přirozenou krásu. Ideální pro speciální příležitosti nebo elegantní každodenní vzhled, s použitím prémiových kosmetických řad.",
+      card6_title: "Exkluzivní Sothys cesty",
+      card6_desc: "Kurátorované lázeňské cesty kombinující několik ošetření Sothys pro kompletní únik mysli i těla. Tyto zakázkové zážitky nabízejí nesrovnatelný luxus a omlazení, často zahrnující soukromý přístup do lázní a gurmánské občerstvení.",
+      about_eyebrow: "Náš závazek",
+      about_title: "Filozofie krásy<br/>Sothys",
+      about_p1: "Institut de Beauté & Spa Sothys ztělesňuje francouzské umění krásy — harmonickou směs pokročilé vědy a smyslového potěšení. Jsme oddáni poskytování výjimečných zážitků péče o pleť a lázeňských procedur, které odhalí vaši přirozenou zářivost.",
+      about_p2: "Nacházíme se v srdci půvabné pražské čtvrti Malá Strana, na Újezdě 40, náš institut je útočištěm klidu a sofistikovanosti.",
+      about_cta: "Objevte naše útočiště →",
+      stat1: "Let francouzské dokonalosti", stat2: "Transformačních ošetření", stat3: "Certifikovaných expertů krásy", stat4: "Klientčina zářivost",
+      spec_eyebrow: "Naši umělci",
+      spec_title: "Seznamte se s našimi experty krásy",
+      spec_desc: "Náš tým vysoce kvalifikovaných profesionálů jsou mistři ve francouzské kosmetice a lázeňské terapii.",
+      spec1_role: "Hlavní kosmetička a expertka Sothys",
+      spec1_bio: "S více než 15 lety specializace na vědecky pokročilé kosmetické techniky Sothys je Elodie známá svou schopností obnovovat a omlazovat pleť, přinášejíc dotek pařížské elegance do každého ošetření.",
+      spec2_role: "Mistr lázeňský terapeut",
+      spec2_bio: "Marcův terapeutický dotek a hluboké znalosti tělových procedur vytvářejí hluboce relaxační a regenerační lázeňské zážitky. Vyniká v hloubkové masáži, aromaterapii a masáži horkými kameny.",
+      spec3_role: "Specialistka kosmetologie",
+      spec3_bio: "Sophia je expertkou v moderní kosmetologii, obratně provádějící mikrodermabrazi, pokročilé peelingy a cílená ošetření pro přesnou korekci a vylepšení pleti.",
+      spec4_role: "Estetička a vizážistka",
+      spec4_bio: "Juliette kombinuje umělecký talent s technickými dovednostmi k vytváření dokonalých líčení a zdůraznění přirozených rysů pomocí pokročilých estetických technik.",
+      spec5_role: "Expertka na péči o tělo a peelingy",
+      spec5_bio: "Chloé se specializuje na vytvoření zářivé, hladké pokožky pomocí expertních tělových peelingů, zábalů a osvěžujících lázeňských procedur, zanechávajíc vás s pocitem obnovy.",
+      spec6_role: "Specialista pánské péče",
+      spec6_bio: "Antoine nabízí rafinované kosmetické služby pro muže, zaměřené na precizní střihy, terapeutické ošetření pokožky hlavy a omlazující péči o obličej přizpůsobenou mužské pleti.",
+      booking_eyebrow: "Začněte své potěšení",
+      booking_title: "Rezervujte si svůj Sothys zážitek",
+      booking_desc: "Objevte zakázková ošetření přizpůsobená vašim jedinečným potřebám. Naplánujte si konzultaci ještě dnes.",
+      booking_cta: "Rezervujte svůj únik →",
+      loc_eyebrow: "Náš Pařížský únik",
+      loc_title: "Pražský Institut de Beauté",
+      loc_address_title: "Újezd 450/40<br/>Malá Strana, Praha",
+      loc_addr: "Adresa",
+      loc_hours: "Otevírací doba",
+      loc_hours_val: "Po–Pá: 9:00 – 20:00<br/>Sobota: 10:00 – 18:00<br/>Neděle: Zavřeno",
+      loc_phone: "Telefon",
+      loc_email: "E-mail",
+      loc_transport: "Doprava",
+      loc_transport_val: "Tram 7, 9, 12, 20, 22, 23: Hellichova<br/>Metro A: Malostranská (15 min pěšky)<br/>Parkování: Nedaleko parkoviště Petřín",
+      footer_desc: "Újezd 450/40, Malá Strana, Praha 1. Svatyně, kde se francouzská elegance a vědecká péče o pleť proměňují v krásu.",
+      footer_services: "Služby", footer_clinic: "Klinika", footer_legal: "Právní informace",
+      f_facial: "Kosmetické kúry Sothys", f_body: "Lázeňské tělové rituály", f_cosm: "Kosmetologie",
+      f_aesthet: "Estetika", f_makeup: "Líčení", f_pkg: "Signaturní cesty",
+      f_about: "Naše filozofie", f_team: "Naši experti", f_loc: "Navštivte nás",
+      f_careers: "Kariéra", f_gift: "Dárkové poukazy",
+      f_faqs: "Často kladené dotazy", f_contact: "Kontakt", f_privacy: "Ochrana soukromí", f_terms: "Podmínky služby"
+    },
+    ru: {
+      hero_eyebrow: "Французское искусство красоты",
+      hero_title: "INSTITUT DE BEAUTÉ<br/>SOTHYS PRAGUE",
+      hero_sub: "Испытайте вершину ухода за кожей и спа-ритуалов",
+      hero_cta: "Откройте наши процедуры →",
+      scroll: "Прокрутить",
+      services_eyebrow: "Наша экспертиза",
+      services_title: "Французские ритуалы красоты",
+      services_desc: "Побалуйте себя эксклюзивными процедурами Sothys, где парижская элегантность сочетается с передовой дерматологической наукой.",
+      card1_title: "Продвинутые косметические процедуры Sothys",
+      card1_desc: "Испытайте всемирно известные косметические процедуры Sothys. От нашего фирменного массажа Digi-Expression™ до целевых решений для увлажнения, борьбы со старением и сияния кожи — мы восстанавливаем естественную жизненную силу вашей кожи.",
+      card2_title: "Премиальные спа-ритуалы для тела",
+      card2_desc: "Погрузитесь в чистое расслабление. Наши процедуры для тела включают роскошное отшелушивание, терапевтический массаж и питательные обертывания с использованием эксклюзивных коллекций по уходу за телом Sothys для максимального омоложения.",
+      card3_title: "Экспертные косметологические процедуры",
+      card3_desc: "Современная эстетическая косметология. Передовые процедуры для персонализированной коррекции кожи, включая микродермабразию, мягкие пилинги и высокоэффективные сыворотки.",
+      card4_title: "Продвинутый эстетический уход",
+      card4_desc: "Передовые эстетические процедуры, направленные на ревитализацию и укрепление. Использование передовых технологий и профессиональных формул Sothys для видимых, стойких результатов.",
+      card5_title: "Французский макияж",
+      card5_desc: "Профессиональный макияж, подчеркивающий вашу естественную красоту. Идеально подходит для особых случаев или элегантного повседневного образа, с использованием премиальных косметических линий.",
+      card6_title: "Эксклюзивные путешествия Sothys",
+      card6_desc: "Курируемые спа-путешествия, объединяющие несколько процедур Sothys для полного ухода за разумом и телом. Эти индивидуальные впечатления предлагают непревзойденную роскошь и омоложение, часто включая частный спа-доступ и изысканные напитки.",
+      about_eyebrow: "Наше обязательство",
+      about_title: "Философия красоты<br/>Sothys",
+      about_p1: "Institut de Beauté & Spa Sothys воплощает французское искусство красоты — гармоничное сочетание передовой науки и чувственного удовольствия. Мы стремимся предоставлять исключительные процедуры по уходу за кожей и спа, раскрывающие ваше естественное сияние.",
+      about_p2: "Расположенный в самом сердце очаровательного пражского района Мала Страна на Уезде 40, наш институт — это оазис спокойствия и изысканности.",
+      about_cta: "Откройте наше убежище →",
+      stat1: "Лет французского совершенства", stat2: "Преобразующих процедур", stat3: "Сертифицированных экспертов красоты", stat4: "Сияние клиентов",
+      spec_eyebrow: "Наши художники",
+      spec_title: "Познакомьтесь с нашими экспертами красоты",
+      spec_desc: "Наша команда высококвалифицированных специалистов — мастера французской косметологии и спа-терапии.",
+      spec1_role: "Главный косметолог и эксперт Sothys",
+      spec1_bio: "Имея более 15 лет опыта в передовых косметических техниках Sothys, Элоди известна своей способностью восстанавливать и омолаживать кожу, привнося штрих парижской элегантности в каждую процедуру.",
+      spec2_role: "Мастер спа-терапевт",
+      spec2_bio: "Терапевтическое прикосновение Марка и глубокие знания массажа создают глубоко расслабляющие и восстанавливающие спа-путешествия. Он преуспевает в глубокой мышечной, ароматерапии и массаже горячими камнями.",
+      spec3_role: "Специалист по косметологии",
+      spec3_bio: "София — эксперт в современной косметологии, умело выполняющая микродермабразию, продвинутые пилинги и целевые процедуры для точной коррекции и улучшения кожи.",
+      spec4_role: "Эстетист и визажист",
+      spec4_bio: "Жюльетт сочетает художественный талант с техническими навыками для создания безупречного макияжа и подчеркивания естественных черт с помощью передовых эстетических методов.",
+      spec5_role: "Эксперт по уходу за телом и пилингам",
+      spec5_bio: "Хлоя специализируется на создании сияющей, гладкой кожи с помощью экспертных пилингов для тела, обертываний и бодрящих спа-процедур, оставляя вас с чувством обновления.",
+      spec6_role: "Мастер мужского груминга",
+      spec6_bio: "Антуан предлагает изысканные услуги по уходу за мужчинами, фокусируясь на точных стрижках, терапевтических процедурах для кожи головы и омолаживающем уходе за кожей, адаптированном для мужской кожи.",
+      booking_eyebrow: "Начните свое наслаждение",
+      booking_title: "Закажите свой опыт Sothys",
+      booking_desc: "Откройте для себя индивидуальные процедуры, адаптированные к вашим уникальным потребностям. Запланируйте консультацию сегодня.",
+      booking_cta: "Зарезервируйте свой побег →",
+      loc_eyebrow: "Наше парижское убежище",
+      loc_title: "Пражский Institut de Beauté",
+      loc_address_title: "Újezd 450/40<br/>Malá Strana, Прага",
+      loc_addr: "Адрес",
+      loc_hours: "Часы работы",
+      loc_hours_val: "Пн–Пт: 9:00 – 20:00<br/>Суббота: 10:00 – 18:00<br/>Воскресенье: Выходной",
+      loc_phone: "Телефон",
+      loc_email: "Эл. почта",
+      loc_transport: "Транспорт",
+      loc_transport_val: "Трамвай 7, 9, 12, 20, 22, 23: Hellichova<br/>Метро A: Malostranská (15 мин пешком)<br/>Парковка: Рядом парковка Petřín",
+      footer_desc: "Újezd 450/40, Malá Strana, Praha 1. Святилище, где французская элегантность и научный уход за кожей преображают красоту.",
+      footer_services: "Услуги", footer_clinic: "Клиника", footer_legal: "Правовая информация",
+      f_facial: "Косметические процедуры Sothys", f_body: "Спа-ритуалы для тела", f_cosm: "Косметология",
+      f_aesthet: "Эстетика", f_makeup: "Макияж", f_pkg: "Фирменные путешествия",
+      f_about: "Наша философия", f_team: "Наши эксперты", f_loc: "Посетите нас",
+      f_careers: "Карьера", f_gift: "Подарочные сертификаты",
+      f_faqs: "Часто задаваемые вопросы", f_contact: "Контакты", f_privacy: "Политика конфиденциальности", f_terms: "Условия использования"
+    }
+  };
+
+  let currentLang = 'en';
+
+  function setLang(lang) {
+    currentLang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (i18n[lang] && i18n[lang][key]) {
+        el.innerHTML = i18n[lang][key];
+      }
+    });
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent.trim().toLowerCase() === lang);
+    });
+    document.documentElement.lang = lang;
+  }
+  
+  setLang(navigator.language.split('-')[0] || 'en');
+
+
+  // ============================================================
+  // THREE.JS WEBGL — OPAL SPA FLUID ENGINE SETUP
+  // ============================================================
+  (function initWebGL() {
+    const container = document.getElementById('canvas-container');
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x08080c, 0); // Dark base color for background
+    renderer.shadowMap.enabled = false;
+    container.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 0, 4.6);
+
+    // Sothys French Luxury Aesthetics Core Mesh
+    const geometry = new THREE.TorusKnotGeometry(1.2, 0.32, 180, 24, 2, 3);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xfffafa, // Pearlescent Nude / Soft White
+      metalness: 0.85, // Highly reflective, like polished opal
+      roughness: 0.04  // Very smooth, subtle pearlescent sheen
+    });
+    const knotMesh = new THREE.Mesh(geometry, material);
+    knotMesh.position.set(0, 0, 0);
+    scene.add(knotMesh);
+
+    // Compensated Studio Lighting - Sothys Theme
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 5.5); // Bright White light for key reflections
+    dirLight1.position.set(6, 6, 6);
+    scene.add(dirLight1);
+
+    const dirLight2 = new THREE.DirectionalLight(0xffe4e1, 4.0); // Intense Warm Rose-Gold Contour Rim Glow
+    dirLight2.position.set(-6, -2, -4);
+    scene.add(dirLight2);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // Soft ambient fill
+    scene.add(ambientLight);
+
+    // Subtle fill light to enhance pearlescent effect
+    const fillLight = new THREE.DirectionalLight(0xFAF0E6, 2.2); // Light beige/cream fill
+    fillLight.position.set(0, -4, 5);
+    scene.add(fillLight);
+
+
+    // Mouse tracking dynamic rotation
+    let mouseX = 0, mouseY = 0;
+    let targetRotX = 0, targetRotY = 0;
+    let currentRotX = 0, currentRotY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = (e.clientX / window.innerWidth - 0.5) * 2.0;
+      mouseY = (e.clientY / window.innerHeight - 0.5) * 2.0;
+    });
+
+    // Scroll-based dynamic camera Z position & wireframe state
+    let cameraTargetZ = 4.6;
+    let isWireframeActive = false;
+
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const heroElement = document.getElementById('hero');
+      const servicesElement = document.getElementById('services');
+      const specialistsElement = document.getElementById('specialists');
+
+      if (!heroElement || !servicesElement || !specialistsElement) return;
+
+      const heroHeight = heroElement.offsetHeight;
+      // Adjust scroll range dynamically based on actual element offsets
+      const servicesSectionTop = servicesElement.offsetTop;
+      const servicesSectionHeight = servicesElement.offsetHeight;
+      const specialistsSectionTop = specialistsElement.offsetTop;
+
+      // Calculate overall scroll progress within the relevant dynamic sections
+      let scrollProgress = 0;
+      // Define specific scroll points for transitions
+      const heroScrollEnd = heroHeight * 0.6; // Point after which the hero might start fading or transitioning
+      const servicesScrollStart = servicesSectionTop - window.innerHeight * 0.4; // Start of services interest area
+      const servicesScrollMid = servicesSectionTop + servicesSectionHeight * 0.4; // Middle of services
+      const servicesScrollEnd = servicesSectionTop + servicesSectionHeight * 0.9; // End of services interest area
+      const specialistsScrollStart = specialistsSectionTop * 0.85; // Where re-assembly completes
+
+      if (scrollY <= heroScrollEnd) {
+        scrollProgress = 0; // Still in hero influence
+      } else if (scrollY < servicesScrollStart) {
+        scrollProgress = (scrollY - heroScrollEnd) / (servicesScrollStart - heroScrollEnd); // Transitioning to services
+      } else if (scrollY < servicesScrollEnd) {
+        const progressInServices = (scrollY - servicesScrollStart) / (servicesScrollEnd - servicesScrollStart);
+        scrollProgress = 0.2 + progressInServices * 0.6; // Covers 20% to 80% of total scroll progress
+      } else if (scrollY < specialistsScrollStart) {
+        scrollProgress = 0.8 + (scrollY - servicesScrollEnd) / (specialistsScrollStart - servicesScrollEnd) * 0.2; // Transitioning to specialists
+      } else {
+        scrollProgress = 1.0; // Past specialists scroll focus
+      }
+      scrollProgress = Math.max(0, Math.min(1, scrollProgress)); // Clamp progress
+
+      // Camera Z position logic (zoom into knot)
+      const zoomStart = 0.2; // When zoom begins
+      const zoomEnd = 0.6;   // When zoom reaches its minimum
+      const reassemblyStart = 0.7; // When re-assembly begins
+      const reassemblyEnd = 0.9; // When re-assembly is complete
+
+      if (scrollProgress < zoomStart) {
+        cameraTargetZ = 4.6;
+      } else if (scrollProgress < zoomEnd) {
+        const zoomFactor = (scrollProgress - zoomStart) / (zoomEnd - zoomStart);
+        cameraTargetZ = THREE.MathUtils.lerp(4.6, 1.0, zoomFactor); // Zoom from 4.6 to 1.0
+      } else if (scrollProgress < reassemblyStart) {
+        cameraTargetZ = 1.0; // Stay zoomed in
+      } else if (scrollProgress < reassemblyEnd) {
+        const reassemblyFactor = (scrollProgress - reassemblyStart) / (reassemblyEnd - reassemblyStart);
+        cameraTargetZ = THREE.MathUtils.lerp(1.0, 4.6, reassemblyFactor); // Zoom out from 1.0 to 4.6
+      } else {
+        cameraTargetZ = 4.6;
+      }
+
+      // Wireframe state logic based on scroll progress
+      const wireframeActivationStart = 0.25;
+      const wireframeDeactivationStart = 0.75;
+
+      if (scrollProgress >= wireframeActivationStart && scrollProgress < wireframeDeactivationStart && !isWireframeActive) {
+        material.wireframe = true;
+        isWireframeActive = true;
+      } else if ((scrollProgress < wireframeActivationStart || scrollProgress >= wireframeDeactivationStart) && isWireframeActive) {
+        material.wireframe = false;
+        isWireframeActive = false;
+      }
+    });
+
+    let currentCameraZ = 4.6;
+
+    // Animation loop
+    let time = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      time += 0.008;
+
+      // Smooth mouse tracking rotation
+      targetRotY = mouseX * 0.5;
+      targetRotX = mouseY * -0.25;
+      currentRotX = THREE.MathUtils.lerp(currentRotX, targetRotX, 0.05);
+      currentRotY = THREE.MathUtils.lerp(currentRotY, targetRotY, 0.05);
+
+      // Apply rotation with time-based oscillation for subtle movement
+      knotMesh.rotation.x = currentRotX + Math.sin(time * 0.7) * 0.1;
+      knotMesh.rotation.y = currentRotY + Math.cos(time * 0.4) * 0.1;
+      knotMesh.rotation.z = time * 0.05 + Math.sin(time * 1.1) * 0.05;
+
+      // Smoothly interpolate camera Z position
+      currentCameraZ = THREE.MathUtils.lerp(currentCameraZ, cameraTargetZ, 0.04);
+      camera.position.z = currentCameraZ;
+
+      // Dynamic light intensity for pearlescent glow
+      dirLight1.intensity = 5.5 + Math.sin(time * 1.9) * 0.7;
+      dirLight2.intensity = 4.0 + Math.cos(time * 1.5 + 0.8) * 0.5;
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // Handle window resizing
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    });
+
+    // Expose for potential integration if needed
+    window._sothysWebGL = { mesh: knotMesh, material, camera };
+  })();
+
+  // ============================================================
+  // PARTICLE SYSTEM — 2D CANVAS PARTICLES (Pearl & Rose Gold)
+  // ============================================================
+  (function initParticles() {
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const PARTICLE_COUNT = 3500; // Increased particle count for density
+    const particles = [];
+
+    // Particle properties for Sothys theme / French Luxury
+    const colors = ['#fffaf0', '#ffe4e1', '#f5f5dc', '#e1c6c3']; // Light Pearl, Soft Rose, Beige, Muted Rose
+
+    function randomBetween(a, b) {
+      return a + Math.random() * (b - a);
+    }
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      let color = colors[Math.floor(Math.random() * colors.length)];
+      particles.push({
+        x: randomBetween(0, canvas.width),
+        y: randomBetween(0, canvas.height),
+        baseX: randomBetween(0, canvas.width),
+        baseY: randomBetween(0, canvas.height),
+        vx: randomBetween(-0.1, 0.1),
+        vy: randomBetween(-0.1, 0.1),
+        size: randomBetween(0.7, 2.0),
+        alpha: randomBetween(0.1, 0.5),
+        color: color,
+        speed: randomBetween(0.7, 3.0),
+        phase: randomBetween(0, Math.PI * 2),
+        // Properties for diagonal matrix mode
+        diagOffsetX: randomBetween(-40, 40),
+        diagOffsetY: randomBetween(-40, 40),
+        lineLength: randomBetween(40, 90)
+      });
+    }
+
+    let diagonalModeProgress = 0; // 0 = ambient, 1 = full diagonal matrix
+
+    window.addEventListener('scroll', updateDiagonalMode);
+
+    function updateDiagonalMode() {
+      const scrollY = window.scrollY;
+      const servicesEl = document.getElementById('services');
+      const specialistsEl = document.getElementById('specialists');
+      if (!servicesEl || !specialistsEl) return;
+
+      const servicesTop = servicesEl.offsetTop;
+      const servicesHeight = servicesEl.offsetHeight;
+      const specialistsTop = specialistsEl.offsetTop;
+
+      const scrollRangeStart = servicesTop;
+      const scrollRangeEnd = specialistsTop * 0.85;
+      const totalScrollRange = scrollRangeEnd - scrollRangeStart;
+
+      if (scrollY >= scrollRangeStart && scrollY < scrollRangeEnd) {
+        const progressInServices = (scrollY - scrollRangeStart) / totalScrollRange;
+        const activationStart = 0.08; // Start diagonal phase a bit later
+        const activationEnd = 0.45;   // Full diagonal phase
+        const deactivationStart = 0.85; // Start re-assembly
+
+        if (progressInServices < activationStart) {
+          diagonalModeProgress = 0;
+        } else if (progressInServices < activationEnd) {
+          diagonalModeProgress = (progressInServices - activationStart) / (activationEnd - activationStart);
+        } else if (progressInServices < deactivationStart) {
+          diagonalModeProgress = 1;
+        } else {
+          diagonalModeProgress = 1 - (progressInServices - deactivationStart) / (1 - deactivationStart);
+        }
+      } else {
+        diagonalModeProgress = 0;
+      }
+      diagonalModeProgress = Math.max(0, Math.min(1, diagonalModeProgress));
+    }
+
+    let frameCount = 0;
+
+    function drawParticles() {
+      requestAnimationFrame(drawParticles);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      frameCount++;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+
+        if (diagonalModeProgress < 0.02) { // Ambient drift mode
+          p.x += p.vx + Math.sin(frameCount * 0.015 + p.phase) * 0.4;
+          p.y += p.vy + Math.cos(frameCount * 0.015 + p.phase + 0.8) * 0.4;
+
+          if (p.x > canvas.width + p.size) p.x = -p.size;
+          if (p.x < -p.size) p.x = canvas.width + p.size;
+          if (p.y > canvas.height + p.size) p.y = -p.size;
+          if (p.y < -p.size) p.y = canvas.height + p.size;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.alpha * 0.35;
+          ctx.fill();
+          ctx.globalAlpha = 1;
+
+        } else { // Diagonal matrix mode - lines shooting up and right
+          const W = canvas.width;
+          const H = canvas.height;
+          const spread = Math.max(W, H) * 1.4;
+
+          let startX, startY;
+          if ((i % 4) === 0) {
+            startX = randomBetween(0, W * 0.7);
+            startY = H + 100;
+          } else if ((i % 4) === 1) {
+            startX = -100;
+            startY = randomBetween(0, H * 0.7);
+          } else if ((i % 4) === 2) {
+            startX = randomBetween(W * 0.3, W + 100);
+            startY = -100;
+          } else {
+            startX = W + 100;
+            startY = randomBetween(H * 0.3, H + 100);
+          }
+
+          const t = diagonalModeProgress;
+          const easedT = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+          const currentTravel = easedT * spread;
+
+          const lineEndX = startX + currentTravel + p.diagOffsetX;
+          const lineEndY = startY - currentTravel + p.diagOffsetY;
+
+          const blendFactor = diagonalModeProgress;
+          const currentX = p.x + (lineEndX - p.x) * blendFactor;
+          const currentY = p.y + (lineEndY - p.y) * blendFactor;
+
+          const grad = ctx.createLinearGradient(currentX, currentY, currentX + p.lineLength, currentY - p.lineLength);
+          grad.addColorStop(0, 'rgba(255, 228, 225, 0)'); // Soft rose gold fade in
+          grad.addColorStop(0.4, p.color);
+          grad.addColorStop(1, 'rgba(255, 228, 225, 0)'); // Soft rose gold fade out
+
+          ctx.beginPath();
+          ctx.moveTo(currentX, currentY);
+          ctx.lineTo(currentX + p.lineLength * easedT, currentY - p.lineLength * easedT);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = p.size * 0.6;
+          ctx.globalAlpha = p.alpha * (diagonalModeProgress * 0.7 + 0.3); // Glow intensity scales
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+
+          p.x = currentX;
+          p.y = currentY;
+        }
+      }
+    }
+
+    drawParticles();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  })();
+
+  // ============================================================
+  // MATRIX CANVAS OVERLAY (Pearl-Gold Diagonal Grid)
+  // ============================================================
+  (function initMatrixOverlay() {
+    const canvas = document.getElementById('matrix-overlay');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let matrixActiveProgress = 0;
+
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const servicesEl = document.getElementById('services');
+      const specialistsEl = document.getElementById('specialists');
+      if (!servicesEl || !specialistsEl) return;
+
+      const servicesTop = servicesEl.offsetTop;
+      const servicesHeight = servicesEl.offsetHeight;
+      const specialistsTop = specialistsEl.offsetTop;
+
+      const scrollRangeStart = servicesTop;
+      const scrollRangeEnd = specialistsTop * 0.85;
+      const totalScrollRange = scrollRangeEnd - scrollRangeStart;
+
+      if (scrollY >= scrollRangeStart && scrollY < scrollRangeEnd) {
+        const progressInServices = (scrollY - scrollRangeStart) / totalScrollRange;
+        const activationStart = 0.08;
+        const activationEnd = 0.45;
+        const deactivationStart = 0.85;
+
+        if (progressInServices < activationStart) {
+          matrixActiveProgress = 0;
+        } else if (progressInServices < activationEnd) {
+          matrixActiveProgress = (progressInServices - activationStart) / (activationEnd - activationStart);
+        } else if (progressInServices < deactivationStart) {
+          matrixActiveProgress = 1;
+        } else {
+          matrixActiveProgress = 1 - (progressInServices - deactivationStart) / (1 - deactivationStart);
+        }
+      } else {
+        matrixActiveProgress = 0;
+      }
+      matrixActiveProgress = Math.max(0, Math.min(1, matrixActiveProgress));
+      canvas.style.opacity = (matrixActiveProgress * 0.35).toString(); // Fade overlay in/out
+    });
+
+    let mt = 0;
+
+    function drawMatrix() {
+      requestAnimationFrame(drawMatrix);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (matrixActiveProgress < 0.02) return;
+
+      const W = canvas.width;
+      const H = canvas.height;
+      const spacing = 70;
+      const count = Math.ceil((W + H) / spacing) * 1.3;
+
+      ctx.lineWidth = 0.5;
+      mt += 0.4;
+
+      for (let i = -count; i < count * 2; i++) {
+        const offset = i * spacing + (mt % spacing);
+        const lineAlpha = 0.08 + matrixActiveProgress * 0.2; // More subtle glow
+
+        ctx.beginPath();
+        ctx.moveTo(offset - H, H);
+        ctx.lineTo(offset + H, -H);
+        ctx.strokeStyle = `rgba(255, 228, 225, ${lineAlpha})`; // Soft Rose Gold color with alpha
+        ctx.stroke();
+      }
+    }
+
+    drawMatrix();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  })();
+
+  // ============================================================
+  // DATA PULSE LABELS ANIMATION (Diagonal Travel)
+  // ============================================================
+  (function initDataPulses() {
+    const pulses = [
+      { el: document.getElementById('pulse-1'), delay: 0.0, color: '#ffe4e1' }, // SOTHYS FACIAL
+      { el: document.getElementById('pulse-2'), delay: 0.7, color: '#f5f5dc' }, // SPA RITUAL
+      { el: document.getElementById('pulse-3'), delay: 1.4, color: '#fffafa' }, // GLOW SKIN (white)
+      { el: document.getElementById('pulse-4'), delay: 2.2, color: '#e1c6c3' }, // SOTHYS PRAGUE
+      { el: document.getElementById('pulse-5'), delay: 2.8, color: '#f0e68c' }  // ÚJEZD 40 (goldish)
+    ];
+
+    let pulsesActive = false;
+    let animationFrames = [];
+
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const servicesEl = document.getElementById('services');
+      const specialistsEl = document.getElementById('specialists');
+      if (!servicesEl || !specialistsEl) return;
+
+      const servicesTop = servicesEl.offsetTop;
+      const specialistsTop = specialistsEl.offsetTop;
+      const scrollRangeStart = servicesEl.offsetTop;
+      const scrollRangeEnd = specialistsEl.offsetTop * 0.85;
+
+      const isInActiveScrollRange = scrollY >= scrollRangeStart && scrollY < scrollRangeEnd;
+
+      if (isInActiveScrollRange && !pulsesActive) {
+        pulsesActive = true;
+        startPulseAnimations();
+      } else if (!isInActiveScrollRange && pulsesActive) {
+        pulsesActive = false;
+        stopPulseAnimations();
+      }
+    });
+
+    function stopPulseAnimations() {
+      pulses.forEach(p => {
+        p.el.style.opacity = '0';
+        p.el.style.transform = 'translate(-50%, -50%)';
+      });
+      animationFrames.forEach(frame => cancelAnimationFrame(frame));
+      animationFrames = [];
+    }
+
+    function startPulseAnimations() {
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+
+      function animatePulse(pulse, index) {
+        if (!pulsesActive) {
+          pulse.el.style.opacity = '0';
+          return;
+        }
+
+        const startX = W * 0.45 + Math.random() * W * 0.2;
+        const startY = H * 0.65 + Math.random() * H * 0.2;
+        const duration = 3800 + Math.random() * 1800;
+        const startTime = performance.now();
+
+        pulse.el.style.left = `${startX}px`;
+        pulse.el.style.top = `${startY}px`;
+        pulse.el.style.opacity = '0';
+        pulse.el.style.color = pulse.color;
+
+        function tick(now) {
+          if (!pulsesActive) {
+            pulse.el.style.opacity = '0';
+            return;
+          }
+          const elapsed = now - startTime;
+          const t = Math.min(1, elapsed / duration);
+
+          const easedT = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+          const travelDistance = Math.max(W, H) * 1.1;
+
+          const currentX = startX + easedT * travelDistance * 0.7;
+          const currentY = startY - easedT * travelDistance * 0.7;
+
+          pulse.el.style.left = `${currentX}px`;
+          pulse.el.style.top = `${currentY}px`;
+
+          let alpha = 0;
+          if (t < 0.1) alpha = t / 0.1;
+          else if (t > 0.8) alpha = (1 - t) / 0.2;
+          else alpha = 1;
+
+          pulse.el.style.opacity = (alpha * 0.7).toString();
+
+          if (t < 1) {
+            const frame = requestAnimationFrame(tick);
+            animationFrames.push(frame);
+          } else {
+            pulse.el.style.opacity = '0';
+            if (pulsesActive) {
+              setTimeout(() => animatePulse(pulse, index), 600 + Math.random() * 1200);
+            }
+          }
+        }
+         const frame = requestAnimationFrame(tick);
+         animationFrames.push(frame);
+      }
+
+      pulses.forEach((p, i) => {
+        setTimeout(() => {
+          if (pulsesActive) animatePulse(p, i);
+        }, p.delay * 1000 + Math.random() * 600);
+      });
+    }
+  })();
+
+  // ============================================================
+  // GSAP SCROLLTRIGGER — KINETIC BENTO DIAGONAL FLOW
+  // ============================================================
+  (function initGSAP() {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const bentoWrapper = document.getElementById('bento-wrapper');
+
+    if (bentoWrapper) {
+      ScrollTrigger.create({
+        trigger: '#services',
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 1.9, // Slightly slower scrub for more cinematic feel
+        pin: false,
+        onUpdate: (self) => {
+          const progress = self.progress;
+
+          // Define scroll progress breakpoints for different phases
+          const introStart = 0.0;
+          const introEnd = 0.15;
+          const moveStart = 0.15;
+          const moveEnd = 0.75; // Transitioning back begins here
+          const returnStart = 0.75;
+          const returnEnd = 0.90; // Bento fully returned/ended
+          const finalPosition = 0.90; // Where bento rests after moving
+
+          const maxTravelX = window.innerWidth * 1.30;
+          const maxTravelY = -window.innerHeight * 1.30;
+
+          let currentX = 0, currentY = 0, currentOpacity = 1;
+
+          if (progress < moveStart) { // Initial state
+            currentX = 0; currentY = 0; currentOpacity = 1;
+          } else if (progress < moveEnd) { // Diagonal movement and fade-out
+            const travelProgress = (progress - moveStart) / (moveEnd - moveStart);
+            const easedProgress = travelProgress < 0.5 ? 2 * travelProgress * travelProgress : -1 + (4 - 2 * travelProgress) * travelProgress;
+
+            currentX = easedProgress * maxTravelX;
+            currentY = easedProgress * maxTravelY;
+            currentOpacity = 1 - easedProgress * 0.6; // Fade to 40% visibility
+          } else { // Return and final position
+            const returnProgress = (progress - moveEnd) / (1.0 - moveEnd);
+            const easedReturn = returnProgress < 0.5 ? 2 * returnProgress * returnProgress : -1 + (4 - 2 * returnProgress) * returnProgress;
+
+            // Interpolate back towards a position slightly off-screen
+            currentX = maxTravelX * (1 - easedReturn * 0.7);
+            currentY = maxTravelY * (1 - easedReturn * 0.7);
+            currentOpacity = 0.4 + easedReturn * 0.6; // Fade back to full opacity
+          }
+
+          gsap.set(bentoWrapper, { x: currentX, y: currentY, opacity: currentOpacity });
+        }
+      });
+    }
+
+    // Reveal animations for static elements
+    gsap.from('.services-header', {
+      scrollTrigger: { trigger: '#services', start: 'top 80%' },
+      y: 50, opacity: 0, duration: 1.2, ease: 'power3.out'
+    });
+
+    document.querySelectorAll('.bento-card').forEach((card, i) => {
+      gsap.from(card, {
+        scrollTrigger: { trigger: card, start: 'top 92%', end: 'bottom 30%', toggleActions: 'play none none none' },
+        y: 70, opacity: 0, duration: 1.1, delay: i * 0.07, ease: 'power3.out'
+      });
+    });
+
+    document.querySelectorAll('.specialist-card').forEach((card, i) => {
+      gsap.from(card, {
+        scrollTrigger: { trigger: card, start: 'top 90%', end: 'bottom 25%', toggleActions: 'play none none none' },
+        y: 50, opacity: 0, duration: 1.0, delay: i * 0.11, ease: 'power2.out'
+      });
+    });
+
+    document.querySelectorAll('.stat-item').forEach((item, i) => {
+      gsap.from(item, {
+        scrollTrigger: { trigger: item, start: 'top 88%', end: 'bottom 25%', toggleActions: 'play none none none' },
+        y: 40, opacity: 0, duration: 0.9, delay: i * 0.1, ease: 'power2.out'
+      });
+    });
+
+    document.querySelectorAll('.location-detail').forEach((item, i) => {
+      gsap.from(item, {
+        scrollTrigger: { trigger: item, start: 'top 90%', end: 'bottom 25%', toggleActions: 'play none none none' },
+        x: -40, opacity: 0, duration: 0.8, delay: i * 0.1, ease: 'power2.out'
+      });
+    });
+  })();
+
+  // ============================================================
+  // BENTO CARD HOVER EFFECT (Mouse Tilt)
+  // ============================================================
+  (function initTilt() {
+    const cards = document.querySelectorAll('[data-tilt]');
+
+    cards.forEach(card => {
+      let timeout;
+
+      card.addEventListener('mousemove', (e) => {
+        clearTimeout(timeout);
+        const rect = card.getBoundingClientRect();
+        const cx = e.clientX - rect.left;
+        const cy = e.clientY - rect.top;
+        const cardCenterX = rect.width / 2;
+        const cardCenterY = rect.height / 2;
+
+        const tiltX = (cx - cardCenterX) / cardCenterX * 9; // Max tilt 9 degrees
+        const tiltY = (cy - cardCenterY) / cardCenterY * -9; // Inverse Y axis
+
+        card.style.transform = `perspective(1200px) rotateX(${tiltY}deg) rotateY(${tiltX}deg) translateZ(20px)`; // More pronounced push
+        card.style.transition = 'transform 0.1s ease-out';
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transition = 'transform 0.7s cubic-bezier(0.23, 1, 0.32, 1)'; // Smoother return
+        card.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+
+        timeout = setTimeout(() => {
+          card.style.transition = '';
+        }, 700);
+      });
+    });
+  })();
+
+  // ============================================================
+  // INTERSECTION OBSERVER FOR FADE-UP REVEAL ANIMATIONS
+  // ============================================================
+  (function initRevealComponents() {
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, {
+      root: null,
+      threshold: 0.1, // Trigger when 10% visible
+      rootMargin: '0px 0px -80px 0px' // Trigger earlier
+    });
+
+    document.querySelectorAll('.reveal-up').forEach(el => {
+      revealObserver.observe(el);
+    });
+  })();
+
+  // ============================================================
+  // NAVBAR SCROLL BEHAVIOR
+  // ============================================================
+  (function initNavbarScroll() {
+    const navbar = document.getElementById('navbar');
+    const headerHeight = document.getElementById('hero').offsetHeight;
+    const scrollThreshold = headerHeight * 0.4;
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > scrollThreshold) {
+        navbar.style.background = 'rgba(8,8,12,0.96)'; // Darker, more opaque
+        navbar.style.borderBottomColor = 'rgba(255, 228, 225, 0.3)'; // Stronger rose gold border
+      } else {
+        navbar.style.background = 'rgba(8,8,12,0.6)';
+        navbar.style.borderBottomColor = 'rgba(255, 228, 225, 0.2)';
+      }
+    });
+  })();
+
+  // ============================================================
+  // SMOOTH ANCHOR SCROLLING
+  // ============================================================
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      const linkTarget = this.getAttribute('href');
+      const targetElement = document.querySelector(linkTarget);
+
+      if (targetElement) {
+        e.preventDefault();
+        targetElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  });
+
+  </script>
+</body>
+</html>
+
